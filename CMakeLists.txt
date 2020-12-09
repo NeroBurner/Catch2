@@ -61,6 +61,11 @@ if(CATCH_BUILD_EXTRA_TESTS)
     add_subdirectory(projects/ExtraTests)
 endif()
 
+if(CATCH_TEST_CMAKE_INTEGRATION)
+    add_subdirectory(projects/CMakeIntegration)
+endif()
+
+
 # add catch as a 'linkable' target
 add_library(Catch2 INTERFACE)
 

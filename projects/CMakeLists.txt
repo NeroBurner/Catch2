@@ -32,7 +32,6 @@ set(TEST_SOURCES
         ${SELF_TEST_DIR}/UsageTests/BDD.tests.cpp
         ${SELF_TEST_DIR}/UsageTests/Benchmark.tests.cpp
         ${SELF_TEST_DIR}/UsageTests/Class.tests.cpp
-        ${SELF_TEST_DIR}/UsageTests/CMakeCTestRegistration.tests.cpp
         ${SELF_TEST_DIR}/UsageTests/Compilation.tests.cpp
         ${SELF_TEST_DIR}/UsageTests/Condition.tests.cpp
         ${SELF_TEST_DIR}/UsageTests/Decomposition.tests.cpp
