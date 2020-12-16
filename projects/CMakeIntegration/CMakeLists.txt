@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 3.5 )
+cmake_minimum_required( VERSION 3.5...${CMAKE_VERSION})
 
 project( Catch2CMakeIntegrationTest LANGUAGES CXX )
 
@@ -8,5 +8,8 @@ set(CATCH_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../.." CACHE STRING "Path to root of 
 add_executable(${PROJECT_NAME} CMakeCTestRegistration.tests.cpp)
 target_include_directories(${PROJECT_NAME} SYSTEM PRIVATE ${CATCH_DIR}/single_include/catch2/)
 
+if(BUILD_TESTING AND CATCH_BUILD_TESTING)
+    enable_testing()
+endif()
 include(${CATCH_DIR}/contrib/ParseAndAddCatchTests.cmake)
 ParseAndAddCatchTests(${PROJECT_NAME})
