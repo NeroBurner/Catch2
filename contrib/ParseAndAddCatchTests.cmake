@@ -9,6 +9,20 @@
 #    - CATCH_SCENARIO,                                                                             #
 #    - CATCH_TEST_CASE_METHOD.                                                                     #
 #                                                                                                  #
+#  checked unsupported macros                                                                      #
+#    - TEST_CASE() - anonymous,                                                                    #
+#    - SCENARIO() - anonymous,                                                                     #
+#    - SCENARIO_METHOD,                                                                            #
+#    - TEMPLATE_TEST_CASE_SIG,                                                                     #
+#    - TEMPLATE_TEST_CASE_METHOD,                                                                  #
+#    - TEMPLATE_TEST_CASE_METHOD_SIG,                                                              #
+#    - TEMPLATE_LIST_TEST_CASE,                                                                    #
+#    - TEMPLATE_PRODUCT_TEST_CASE,                                                                 #
+#    - TEMPLATE_PRODUCT_TEST_CASE_SIG,                                                             #
+#    - ANON_TEST_CASE,                                                                             #
+#    - METHOD_AS_TEST_CASE,                                                                        #
+#    - REGISTER_TEST_CASE.                                                                         #
+#                                                                                                  #
 #  Usage                                                                                           #
 # 1. make sure this module is in the path or add this otherwise:                                   #
 #    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake.modules/")              #
@@ -32,6 +46,8 @@
 #                                                                                                  #
 #    PARSE_CATCH_TESTS_VERBOSE (Default OFF)                                                       #
 #    -- enables debug messages                                                                     #
+#    PARSE_CATCH_TESTS_UNSUPPORTED_WARNINGS (Default ON)                                           #
+#    -- enables warnings for known unsupported Catch test macros                                   #
 #    PARSE_CATCH_TESTS_NO_HIDDEN_TESTS (Default OFF)                                               #
 #    -- excludes tests marked with [!hide], [.] or [.foo] tags                                     #
 #    PARSE_CATCH_TESTS_ADD_FIXTURE_IN_TEST_NAME (Default ON)                                       #
@@ -61,6 +77,7 @@ if (CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
 endif()
 
 option(PARSE_CATCH_TESTS_VERBOSE "Print Catch to CTest parser debug messages" OFF)
+option(PARSE_CATCH_TESTS_UNSUPPORTED_WARNINGS "Print Catch to CTest parser unsupported macro warnings" ON)
 option(PARSE_CATCH_TESTS_NO_HIDDEN_TESTS "Exclude tests with [!hide], [.] or [.foo] tags" OFF)
 option(PARSE_CATCH_TESTS_ADD_FIXTURE_IN_TEST_NAME "Add fixture class name to the test name" ON)
 option(PARSE_CATCH_TESTS_ADD_TARGET_IN_TEST_NAME "Add target name to the test name" ON)
@@ -69,6 +86,11 @@ option(PARSE_CATCH_TESTS_ADD_TO_CONFIGURE_DEPENDS "Add test file to CMAKE_CONFIG
 function(ParseAndAddCatchTests_PrintDebugMessage)
     if(PARSE_CATCH_TESTS_VERBOSE)
             message(STATUS "ParseAndAddCatchTests: ${ARGV}")
+    endif()
+endfunction()
+function(ParseAndAddCatchTests_PrintWarningMessage)
+    if(PARSE_CATCH_TESTS_UNSUPPORTED_WARNINGS)
+        message(WARNING "ParseAndAddCatchTests: ${ARGV}")
     endif()
 endfunction()
 
@@ -102,6 +124,43 @@ function(ParseAndAddCatchTests_ParseFile SourceFile TestTarget)
         return()
     endif()
     ParseAndAddCatchTests_PrintDebugMessage("parsing ${SourceFile}")
+
+    if(PARSE_CATCH_TESTS_UNSUPPORTED_WARNINGS)
+        # find and warn on unsupported test macros
+        file(STRINGS ${SourceFile} Contents_list)
+
+        list(LENGTH Contents_list Contents_LENGTH)
+        math(EXPR Contents_maxidx "${Contents_LENGTH}-1")
+        foreach(line_idx RANGE ${Contents_maxidx})
+            list(GET Contents_list ${line_idx} line)
+            if(line MATCHES "^[ \t]*(CATCH_)?TEST_CASE[ \t]*\\([ \t]*\\)")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported anonymous TEST_CASE in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?SCENARIO[ \t]*\\([ \t]*\\)")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported anonymous SCENARIO in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?SCENARIO_METHOD[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro SCENARIO_METHOD in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_TEST_CASE_SIG[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_TEST_CASE_SIG in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_TEST_CASE_METHOD[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_TEST_CASE_METHOD in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_TEST_CASE_METHOD_SIG[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_TEST_CASE_METHOD_SIG in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_LIST_TEST_CASE[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_LIST_TEST_CASE in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_PRODUCT_TEST_CASE[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_PRODUCT_TEST_CASE in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?TEMPLATE_PRODUCT_TEST_CASE_SIG[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro TEMPLATE_PRODUCT_TEST_CASE_SIG in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?ANON_TEST_CASE[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro ANON_TEST_CASE in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?METHOD_AS_TEST_CASE[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro METHOD_AS_TEST_CASE in line '${line_idx}': '${line}'")
+            elseif(line MATCHES "^[ \t]*(CATCH_)?REGISTER_TEST_CASE[ \t]*\\(")
+                ParseAndAddCatchTests_PrintWarningMessage("found unsupported macro REGISTER_TEST_CASE in line '${line_idx}': '${line}'")
+            endif()
+        endforeach()
+    endif() #PARSE_CATCH_TESTS_UNSUPPORTED_WARNINGS
+
     file(STRINGS ${SourceFile} Contents NEWLINE_CONSUME)
 
     # Remove block and fullline comments
