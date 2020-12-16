@@ -12,7 +12,7 @@ SCENARIO(){}
 SCENARIO("scenario_no_tag"){}
 SCENARIO("scenario", "[cmake_integration]"){}
 
-SCENARIO_METHOD(FakeFixture){}
+//SCENARIO_METHOD(FakeFixture){} // gets the same name as `SCENARIO()` and breaks execution
 SCENARIO_METHOD(FakeFixture, "scenario_method_no_tag"){}
 SCENARIO_METHOD(FakeFixture, "scenario_method", "[cmake_integration]"){}
 
